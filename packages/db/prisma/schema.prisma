@@ -5,10 +5,71 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User{
+  id          String  @id@default(uuid())
+  name        String
+  email       String  @unique
+  password    String
+  createdAt  DateTime @default(now())
+
+  board   Board[]   @relation("BoardOwner")
+  collaborators  BoardCollaborator[]
+}
+
+model Board{
+  id         String  @id@default(uuid())
+  title      String 
+  isPublic   Boolean @default(false)
+  ownerId    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+
+  owner   User  @relation("BoardOwner",fields:[ownerId],references:[id])
+  elements BoardElement[]
+  collaborators  BoardCollaborator[]
+  versions  BoardVersion[]
+}
+
+model BoardElement{
+  id          String  @id@default(uuid())
+  boardId     String  
+  type        String
+  data        Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  board   Board  @relation(fields:[boardId],references:[id])
+}
+
+model BoardCollaborator {
+  id          String    @id@default(uuid())
+  boardId     String    
+  userid      String
+  role        Role
+  joinedAt    DateTime @default(now())
+
+  board    Board   @relation(fields:[boardId],references:[id])
+  user      User   @relation(fields:[userid],references:[id])
+  @@unique([boardId,userid])
+}
+model BoardVersion{
+  id          String  @id@default(uuid())
+  boardId     String
+  elements    Json
+  createdAt   DateTime @default(now())
+
+  board   Board  @relation(fields:[boardId],references:[id])
+}
+
+enum Role{
+  viewer
+  editor
 }
