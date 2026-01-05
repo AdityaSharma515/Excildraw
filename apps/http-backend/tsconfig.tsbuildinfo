@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/controllers/auth.controller.ts","./src/routes/auth.routes.ts","./src/routes/board.routes.ts","./src/routes/collabarator.routes.ts"],"version":"5.9.2"}

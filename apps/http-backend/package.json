@@ -16,9 +16,13 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@repo/backend-common": "workspace:*",
+    "@repo/common": "workspace:*",
+    "@repo/db": "workspace:*",
+    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
+    "bcrypt": "^6.0.0",
     "express": "^5.2.1",
-    "@repo/backend-common":"workspace:*",
-    "@repo/common":"workspace:*"
+    "zod": "^4.3.2"
   }
 }

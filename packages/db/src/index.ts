@@ -1,3 +1,4 @@
 import { PrismaClient } from "@prisma/client";
 
-export const prismaClient = new PrismaClient()
+// Prisma 7 requires a non-empty options object in some runtime builds; pass an empty options object to satisfy the runtime check.
+export const prismaClient = new PrismaClient({})
