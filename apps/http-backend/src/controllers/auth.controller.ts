@@ -2,6 +2,8 @@ import { Request,Response } from "express";
 import {z} from "zod";
 import bcrypt from "bcrypt"
 import { prismaClient } from "@repo/db/client";
+import jwt from "jsonwebtoken";
+
 export async function signup(req:Request,res:Response){
     try {
         const name=req.body.name;
@@ -45,6 +47,62 @@ export async function signup(req:Request,res:Response){
         res.status(400).json({
             message:"Internal server error"
         });
+        console.error(error);
+    }
+}
+export async function signin(req:Request,res:Response){
+    try {
+        const email=req.body.email;
+        const password=req.body.password;
+        if(!email){
+            res.status(400).json({
+                message:"Email field is empty"
+            });
+            return;
+        }
+        if (!password) {
+            res.status(400).json({
+                message:"password field is empty"
+            });
+            return;
+        }
+        const NewUser=await prismaClient.user.findFirst({where:{email:email}});
+        if (!NewUser) {
+            res.status(400).json({
+                message:"User not found!"
+            });
+            return;
+        }
+        const match=await bcrypt.compare(password,NewUser.password)
+        if (!match) {
+            res.status(401).json({
+                message:"Password is not found"
+            });
+            return;
+        }
+        const secret=process.env.JWT_SECRET;
+        if(!secret){
+            res.status(500).json({
+                message:"Server configuration error"
+            });
+            return;
+        }
+        const token=jwt.sign({id:NewUser.id},secret,{expiresIn:"1h"})
+        res.cookie("token",token,{
+            httpOnly:true,
+            secure:true,
+            sameSite:"strict",
+            maxAge:60*60*1000
+        });
+        res.status(200).json({
+            message:"signin Succesfully",
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            message:"Internal servor error"
+        }
+        );
         console.error(error);
     }
 }

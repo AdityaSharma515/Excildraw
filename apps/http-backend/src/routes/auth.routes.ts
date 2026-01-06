@@ -1,7 +1,8 @@
 import {Router, Request, Response} from "express"
-import { signup } from "../controllers/auth.controller";
+import { signin, signup } from "../controllers/auth.controller";
+import { auth } from "../middleware/auth";
 const router:Router=Router();
 router.post("/auth/signup",signup);
-router.post("/auth/signin", (req: Request, res: Response) => { res.status(501).json({ message: "Not implemented" }); });
-router.get("/auth/me", (req: Request, res: Response) => { res.status(501).json({ message: "Not implemented" }); });
+router.post("/auth/signin", signin );
+router.get("/auth/me",auth,);
 export default router
