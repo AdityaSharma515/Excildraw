@@ -1,6 +1,18 @@
-import { Router } from "express";
+import { Request,Response,NextFunction, Router } from "express";
 const router:Router=Router();
-router.post("/boards/:id/collaborators");
-router.get("/boards/:id/collaborators");
-router.delete("/boards/:id/collaborators/:userId");
+router.post("/boards/:id/collaborators",(req:Request,res:Response,next:NextFunction)=>{
+    res.json({
+        message:"Not Emplemented"
+    });
+});
+router.get("/boards/:id/collaborators",(req:Request,res:Response,next:NextFunction)=>{
+    res.json({
+        message:"Not Emplemented"
+    });
+});
+router.delete("/boards/:id/collaborators/:userId",(req:Request,res:Response,next:NextFunction)=>{
+    res.json({
+        message:"Not Emplemented"
+    });
+});
 export default router;
