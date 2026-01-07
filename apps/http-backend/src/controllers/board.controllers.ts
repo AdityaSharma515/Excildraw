@@ -85,3 +85,42 @@ export  async function openBoard(req:Request,res:Response,next:NextFunction){
         console.error(error)
     }
 }
+export async function deleteBoard(req:Request,res:Response,next:NextFunction){
+    if (!req.user || !req.user.id) {
+        res.status(401).json({
+            message:"Unauthorize"
+        });
+        return;
+    }
+    try {
+        const boardid=req.params.id;
+        if(!boardid){
+            res.status(400).json({
+                message:"Board id not found"
+            });
+            return;
+        }
+        const boardaccess=await prismaClient.board.findFirst({
+           where:{
+                id:boardid,
+                ownerId:req.user.id
+           } 
+        });
+        if (!boardaccess) {
+            res.status(403).json({
+                message:"You can not delete Board"
+            });
+            return;
+        }
+        await prismaClient.board.delete({where:{id:boardid}})
+        res.status(200).json({
+            message:"Board Deleted Succefully"
+        })
+    } catch (error) {
+        res.status(500).json({
+            message:"Error in deleting the Board"
+        })
+        console.error(error);
+    }
+
+}

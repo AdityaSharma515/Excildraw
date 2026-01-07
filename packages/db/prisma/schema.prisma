@@ -47,7 +47,7 @@ model BoardElement{
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
 
-  board   Board  @relation(fields:[boardId],references:[id])
+  board   Board  @relation(fields:[boardId],references:[id],onDelete: Cascade)
 }
 
 model BoardCollaborator {
@@ -57,7 +57,7 @@ model BoardCollaborator {
   role        Role
   joinedAt    DateTime @default(now())
 
-  board    Board   @relation(fields:[boardId],references:[id])
+  board    Board   @relation(fields:[boardId],references:[id],onDelete: Cascade)
   user      User   @relation(fields:[userid],references:[id])
   @@unique([boardId,userid])
 }
@@ -67,7 +67,7 @@ model BoardVersion{
   elements    Json
   createdAt   DateTime @default(now())
 
-  board   Board  @relation(fields:[boardId],references:[id])
+  board   Board  @relation(fields:[boardId],references:[id],onDelete: Cascade)
 }
 
 enum Role{
