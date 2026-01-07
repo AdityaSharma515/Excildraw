@@ -1,10 +1,10 @@
-import { Request,Response } from "express";
+import { NextFunction, Request,Response } from "express";
 import {z} from "zod";
 import bcrypt from "bcrypt"
 import { prismaClient } from "@repo/db/client";
 import jwt from "jsonwebtoken";
 
-export async function signup(req:Request,res:Response){
+export async function signup(req:Request,res:Response,next:NextFunction){
     try {
         const name=req.body.name;
         const email=req.body.email;
@@ -50,7 +50,7 @@ export async function signup(req:Request,res:Response){
         console.error(error);
     }
 }
-export async function signin(req:Request,res:Response){
+export async function signin(req:Request,res:Response,next:NextFunction){
     try {
         const email=req.body.email;
         const password=req.body.password;
@@ -105,4 +105,24 @@ export async function signin(req:Request,res:Response){
         );
         console.error(error);
     }
+}
+export async function information(req:Request,res:Response,next:NextFunction){
+    try {
+        const currentuser=await prismaClient.user.findFirst({where:{id:req.user?.id}});
+        if(!currentuser){
+            res.status(400).json({
+                message:"user not found"
+            });
+            return;
+        }
+        res.status(200).json({
+            currentuser
+        });
+    } catch (error) {
+        res.status(500).json({
+            message:"Internal server error"
+        });
+        console.error(error);
+    }
+
 }

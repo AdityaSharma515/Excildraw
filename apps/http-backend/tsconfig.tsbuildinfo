@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/controllers/auth.controller.ts","./src/routes/auth.routes.ts","./src/routes/board.routes.ts","./src/routes/collabarator.routes.ts"],"version":"5.9.2"}
+{"root":["./src/index.ts","./src/controllers/auth.controller.ts","./src/controllers/board.controllers.ts","./src/middleware/auth.ts","./src/routes/auth.routes.ts","./src/routes/board.routes.ts","./src/routes/collabarator.routes.ts","./src/types/express.d.ts"],"version":"5.9.2"}
