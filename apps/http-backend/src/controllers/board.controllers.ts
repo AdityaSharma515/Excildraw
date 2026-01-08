@@ -1,6 +1,8 @@
-import { prismaClient } from "@repo/db/client";
+import { prismaClient,Prisma } from "@repo/db/client";
+
 import {Request,Response, NextFunction } from "express";
 
+type IncomingElement={ type:string,data:Prisma.InputJsonValue}
 export async function createBoard(req:Request,res:Response,next:NextFunction){
     const title=req.body.title as string;
     const isPublic=req.body.isPublic;
@@ -123,4 +125,107 @@ export async function deleteBoard(req:Request,res:Response,next:NextFunction){
         console.error(error);
     }
 
+}
+export async function getElements(req:Request,res:Response,next:NextFunction){
+    if (!req.user || !req.user.id) {
+        res.status(401).json({
+            message:"Unauthorized",
+        });
+        return;
+    }
+    try {
+        const boardid=req.params.id;
+        if (!boardid) {
+            res.status(400).json({
+                message:"Board id not present"
+            });
+            return;
+        }
+        const hasaccess=await prismaClient.board.findFirst({where:{
+            id:boardid,
+            OR:[
+                {ownerId:req.user.id},
+                {collaborators:{some:{userid:req.user.id}}},
+                {isPublic:true}
+            ]
+        }});
+        if (!hasaccess) {
+            res.status(403).json({
+                message:"You have not acces to get the Board content"
+            });
+            return;
+        } 
+        const elements=await prismaClient.boardElement.findMany({where:{boardId:boardid}});
+        res.status(200).json({
+            message:"Elements fetch succefully",
+            elements
+        });
+    } catch (error) {
+        res.status(500).json({
+            message:"Failed to fetch elements"
+        });
+        console.error(error);
+    }
+}
+export async function saveElements(req:Request,res:Response,next:NextFunction){
+    if (!req.user || !req.user.id) {
+        res.status(401).json({
+            message:"Unauthorized"
+        });
+        return;
+    }
+    try {
+        const elements:IncomingElement[]=req.body.elements;
+        if (!elements) {
+            res.status(400).json({
+                message:"Elements not found"
+            });
+            return;
+        }
+        if (!Array.isArray(elements)) {
+            res.status(400).json({
+                message:"Elements must be an array"
+            })
+            return;
+        }
+        const boardid=req.params.id;
+        if(!boardid){
+            res.status(400).json({
+                message:"Board id not found"
+            })
+            return;
+        }
+        const checkEditAcces=await prismaClient.board.findFirst({where:{
+            id:boardid,
+            OR:[
+                {ownerId:req.user.id},
+                {collaborators:{some:{userid:req.user.id,role:"editor"}}}
+            ]
+        }});
+        if (!checkEditAcces) {
+            res.status(403).json({
+                message:"You don`t have access"
+            });
+            return;
+        }
+        const elementsdata=elements.map((el)=>({
+            boardId:boardid,
+            type:el.type,
+            data:el.data
+        }));
+        await prismaClient.$transaction(async (tx)=>{
+            await tx.boardElement.deleteMany({where:{boardId:boardid}});
+            if (elementsdata.length>0) {
+                await tx.boardElement.createMany({data:elementsdata})
+            }
+        });
+        res.status(200).json({
+            message:"Element saved succefully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            message:"Internal server Error"
+        });
+        console.error(error);
+    }
 }
