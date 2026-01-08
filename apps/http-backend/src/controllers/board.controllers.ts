@@ -229,3 +229,104 @@ export async function saveElements(req:Request,res:Response,next:NextFunction){
         console.error(error);
     }
 }
+export async function saveSnapshots(req:Request,res:Response,next:NextFunction){
+    if (!req.user || !req.user.id) {
+        res.status(401).json({
+            message:"Unauthorize"
+        });
+        return;
+    }
+    try {
+        const boardid=req.params.id;
+        if (!boardid) {
+            res.status(400).json({
+                message:"Board id not present"
+            })
+            return;
+        };
+        const boardexist=await prismaClient.board.findFirst({where:{
+            id:boardid,
+            OR:[
+                {ownerId:req.user.id},
+                {collaborators:{some:{userid:req.user.id,role:"editor"}}}
+            ]
+        }})
+        if (!boardexist) {
+            res.status(403).json({
+                message:"You have not the access"
+            })
+            return;
+        }
+        const elements:IncomingElement[]=req.body.elements;
+        if (!elements) {
+            res.status(400).json({
+                message:"Elements array not found"
+            })
+        }
+        if (!Array.isArray(elements)) {
+            res.status(400).json({
+                message:"Elements are not in array format"
+            })
+            return;
+        }
+        await prismaClient.boardVersion.create({data:{
+            boardId:boardid,
+            elements:elements
+        }});
+        res.status(201).json({
+            message:"Version saved"
+        })
+    } catch (error) {
+        res.status(500).json({
+            message:"Internal servor error"
+        })
+        console.error(error)
+    }
+}
+
+export async function viewVersions(req:Request,res:Response,next:NextFunction){
+    if (!req.user|| !req.user.id) {
+        res.status(401).json({
+            message:"Unauthorized"
+        });
+        return;
+    }
+    try {
+        const boardid=req.params.id;
+        if (!boardid) {
+            res.status(400).json({
+                message:"Board id not present"
+            })
+            return;
+        };
+        const boardexist=await prismaClient.board.findFirst({where:{
+            id:boardid,
+            OR:[
+                {ownerId:req.user.id},
+                {collaborators:{some:{userid:req.user.id,role:{in:["editor","viewer"]}}}}
+            ]
+        }});
+        if (!boardexist) {
+            res.status(403).json({
+                message:"You have not the access"
+            })
+            return;
+        }
+        const allversions=await prismaClient.boardVersion.findMany({
+            where:{boardId:boardid},
+            orderBy:{createdAt:"desc"},
+            select:{
+                id:true,
+                createdAt:true
+            },
+        });
+        res.status(200).json({
+            allversions
+        })
+    } catch (error) {
+        res.status(500).json({
+            message:"Internal servor error"
+        })
+        console.error(error)
+    }
+}
