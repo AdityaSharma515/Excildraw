@@ -280,7 +280,7 @@ export async function saveSnapshots(req:Request,res:Response,next:NextFunction){
         res.status(500).json({
             message:"Internal servor error"
         })
-        console.error(error)
+        console.error(error);
     }
 }
 

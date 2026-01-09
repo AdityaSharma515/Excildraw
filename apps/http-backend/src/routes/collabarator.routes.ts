@@ -1,18 +1,8 @@
-import { Request,Response,NextFunction, Router } from "express";
+import { Router } from "express";
+import { addCollaborator, deleteCollaborator, getCollaborator } from "../controllers/collabrator.controller";
+import { auth } from "../middleware/auth";
 const router:Router=Router();
-router.post("/boards/:id/collaborators",(req:Request,res:Response,next:NextFunction)=>{
-    res.json({
-        message:"Not Emplemented"
-    });
-});
-router.get("/boards/:id/collaborators",(req:Request,res:Response,next:NextFunction)=>{
-    res.json({
-        message:"Not Emplemented"
-    });
-});
-router.delete("/boards/:id/collaborators/:userId",(req:Request,res:Response,next:NextFunction)=>{
-    res.json({
-        message:"Not Emplemented"
-    });
-});
+router.post("/boards/:id/collaborators",auth,addCollaborator);
+router.get("/boards/:id/collaborators",auth,getCollaborator);
+router.delete("/boards/:id/collaborators/:userId",auth,deleteCollaborator);
 export default router;
