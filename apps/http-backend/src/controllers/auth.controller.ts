@@ -91,7 +91,7 @@ export async function signin(req:Request,res:Response,next:NextFunction){
         res.cookie("token",token,{
             httpOnly:true,
             secure:true,
-            sameSite:"strict",
+            sameSite:"lax",
             maxAge:60*60*1000
         });
         res.status(200).json({
