@@ -1,6 +1,7 @@
-import "ws"
-declare module "ws"{
-    interface WebSocket {
-        userId?:string;
-    }
+import "ws";
+declare module "ws" {
+  interface WebSocket {
+    userId?: string;
+    rooms?: Set<string>;
+  }
 }

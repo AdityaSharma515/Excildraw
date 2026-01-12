@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/types/ws.d.ts","./src/ws/message.ts","./src/ws/permissions.ts","./src/ws/server.ts"],"version":"5.9.2"}

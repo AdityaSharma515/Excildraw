@@ -88,6 +88,7 @@ export async function signin(req:Request,res:Response,next:NextFunction){
             return;
         }
         const token=jwt.sign({id:NewUser.id},secret,{expiresIn:"1h"})
+        res.clearCookie("token");
         res.cookie("token",token,{
             httpOnly:true,
             secure:true,
