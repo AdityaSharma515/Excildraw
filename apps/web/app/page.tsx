@@ -1,10 +1,22 @@
+import Navbar from '../components/Navbar';
+import Hero from '../components/Hero';
+import Stats from '../components/Stats';
+import Testimonials from '../components/Testimonials';
+import CTA from '../components/CTA';
+import CollaborationFeature from '../components/CollaborationFeature';
 
-import { Button } from "@repo/ui/button";
+import Footer from '../components/Footer';
 
-export default function Page() {
+export default function Home() {
   return (
-    <div className="text-red-500 text-6xl font-extrabold">
-      🔥 TAILWIND WORKS 🔥
-    </div>
+    <main className="min-h-screen bg-white">
+      <Navbar />
+      <Hero />
+      <Stats />
+      <CollaborationFeature/>
+      <Testimonials />
+      <CTA />
+      <Footer />
+    </main>
   );
 }
