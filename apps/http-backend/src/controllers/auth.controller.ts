@@ -89,11 +89,12 @@ export async function signin(req:Request,res:Response,next:NextFunction){
         }
         const token=jwt.sign({id:NewUser.id},secret,{expiresIn:"1h"})
         res.clearCookie("token");
-        res.cookie("token",token,{
-            httpOnly:true,
-            secure:true,
-            sameSite:"lax",
-            maxAge:60*60*1000
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 60 * 60 * 1000,
+            path: "/",
         });
         res.status(200).json({
             message:"signin Succesfully",
