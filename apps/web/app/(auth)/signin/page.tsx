@@ -23,6 +23,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Separator } from "@/components/ui/separator"
+import api from "@/lib/api"
 
 const formSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -54,7 +55,7 @@ export default function Page() {
       const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
       if (!BASE_URL) throw new Error("Backend URL not found")
 
-      await axios.post(`${BASE_URL}/auth/signin`, data)
+      await api.post(`${BASE_URL}/auth/signin`, data)
 
       toast.success("Account created successfully 🎉", {
         id: toastId,
