@@ -16,6 +16,10 @@ const RoomCanvas = ({id}:{id:string}) => {
         const ws= new WebSocket(WB_URL)
         ws.onopen=()=>{
             SetSocket(ws);
+            ws.send(JSON.stringify({
+                type:"JOIN_ROOM",
+                roomId:id
+            }))
         }
     },[])
   
@@ -25,7 +29,7 @@ const RoomCanvas = ({id}:{id:string}) => {
     </div>
   }
   return <div>
-      <Canvas id={id}/>
+      <Canvas id={id} socket={Socket}/>
     </div>
 }
 

@@ -135,14 +135,12 @@ export async function getElements(req:Request,res:Response,next:NextFunction){
     }
     try {
         const boardid=req.params.id;
-        console.log(req.params);
         if (!boardid) {
             res.status(400).json({
                 message:"Board id not present"
             });
             return;
         }
-        console.log("board id:0"+boardid)
         const hasaccess=await prismaClient.board.findFirst({where:{
             id:boardid,
             OR:[

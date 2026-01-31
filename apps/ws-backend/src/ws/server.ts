@@ -74,10 +74,13 @@ export function startWSServer(port: number) {
 
           case "DRAW": {
             if (!ws.rooms!.has(msg.roomId)) return;
-
+            const parsedData =
+              typeof msg.data === "string"
+                ? JSON.parse(msg.data)
+                : msg.data;
             broadcast(msg.roomId, ws, {
               type: "DRAW",
-              data: msg.data,
+              data: parsedData,
               userId: ws.userId
             });
             break;

@@ -2,7 +2,7 @@ import { initdraw } from '@/draw'
 import { useRef } from 'react'
 import { useEffect } from 'react'
 
-const Canvas = ({id}:{id:string}) => {
+const Canvas = ({id,socket}:{id:string,socket:WebSocket}) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     useEffect( () => {
     const canvas = canvasRef.current
@@ -11,7 +11,7 @@ const Canvas = ({id}:{id:string}) => {
     let cleanup: (() => void) | undefined
 
     const setup = async () => {
-        cleanup = await initdraw(canvas, id)
+        cleanup = await initdraw(canvas, id,socket)
     }
 
     setup()
@@ -20,7 +20,7 @@ const Canvas = ({id}:{id:string}) => {
             cleanup()
         }
     }
-  }, [])
+  }, [canvasRef])
   return (
     <canvas
       ref={canvasRef}

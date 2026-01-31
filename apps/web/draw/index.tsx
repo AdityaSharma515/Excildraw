@@ -12,10 +12,18 @@ type shape={
     data:Rectangledata
   }
 
-export async function initdraw(canvas:HTMLCanvasElement,id:string): Promise<() => void>{
+export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSocket): Promise<() => void>{
     const ctx = canvas.getContext("2d")
     if (!ctx) return  () => {}
-    let existingshape:shape[]=await getshape(id);    
+    let existingshape:shape[]=await getshape(id);  
+    socket.onmessage=(event)=>{
+      const message=JSON.parse(event.data);
+      console.log(message);
+      if(message.type=="DRAW"){
+        existingshape.push(message.data.shape)
+        clearcanvas(existingshape,canvas,ctx)
+      }
+    }  
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
     clearcanvas(existingshape,canvas,ctx);
@@ -43,12 +51,18 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string): Promise<() =
       const pos = getMousePos(e)
       const width = pos.x - startX
       const height = pos.y - startY
-      existingshape.push({type:"Rectangle",data:{
+      const shape:shape={type:"Rectangle",data:{
         "startx":startX,
         "starty":startY,
         width,
         height
-      }})
+      }}
+      existingshape.push(shape)
+      socket.send(JSON.stringify({
+        type:"DRAW",
+        data:{shape},
+        roomId:id
+      }))
     }
 
     const onMouseMove = (e: MouseEvent) => {
