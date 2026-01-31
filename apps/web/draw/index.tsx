@@ -15,7 +15,7 @@ type shape={
 export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSocket): Promise<() => void>{
     const ctx = canvas.getContext("2d")
     if (!ctx) return  () => {}
-    let existingshape:shape[]=await getshape(id);  
+    let existingshape: shape[] = (await getshape(id)) ?? []; 
     socket.onmessage=(event)=>{
       const message=JSON.parse(event.data);
       console.log(message);
@@ -57,6 +57,7 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
         width,
         height
       }}
+      Saveshape(id,shape);
       existingshape.push(shape)
       socket.send(JSON.stringify({
         type:"DRAW",
@@ -106,13 +107,29 @@ async function getshape(id:string){
     if (!BASE_URL) throw new Error("Backend URL not found")
 
     const response=await api.get(`${BASE_URL}/boards/${id}/elements`)
-    const data=response.data.elements;
-    console.log(data);
-    const shape=data.map((ele:shape[])=>{
-        return ele;
-    })
-    return shape;
+    const elements=response.data.elements;
+    const shapes: shape[] = elements.map((el: any) => ({
+      type: el.type,
+      data: el.data    
+    }))
+    return shapes;
   } catch (error) {
     console.error("error in fetching elements",error)
+  }
+}
+async function Saveshape(id:string,newshape:shape){
+  try {
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+    if (!BASE_URL) throw new Error("Backend URL not found")
+
+    const response=await api.put(`${BASE_URL}/boards/${id}/elements`,{elements: [
+        {
+          type: newshape.type,
+          data: newshape.data
+        }
+        ]})
+    console.log(response.data);
+  } catch (error) {
+    console.error("error in saving elements",error)
   }
 }
