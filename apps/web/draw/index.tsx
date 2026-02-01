@@ -110,8 +110,16 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
           radius
         }}
       }
-      else{
+      else if(tool==="arrow"){
         shape={type:"Arrow",data:{
+          "startx":startX,
+          "starty":startY,
+          endx:pos.x,
+          endy:pos.y
+        }}
+      }
+      else{
+        shape={type:"Line",data:{
           "startx":startX,
           "starty":startY,
           endx:pos.x,
@@ -148,9 +156,15 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
         ctx.arc(startX, startY, radius, 0, Math.PI * 2)
         ctx.stroke()
       }
-      else{
+      else if(tool==="arrow"){
         ctx.beginPath();
         canvas_arrow(ctx, startX,startY,pos.x,pos.y);
+        ctx.stroke();
+      }
+      else{
+        ctx.beginPath();
+        ctx.moveTo( startX, startY );
+        ctx.lineTo( pos.x, pos.y );
         ctx.stroke();
       }
     }
@@ -178,9 +192,15 @@ function clearcanvas(existingshape:shape[],canvas:HTMLCanvasElement,ctx:CanvasRe
       ctx.arc(shape.data.centerx, shape.data.centery, shape.data.radius, 0, Math.PI * 2)
       ctx.stroke();
     }
-    else{
+    else if(shape.type==="Arrow"){
       ctx.beginPath();
       canvas_arrow(ctx, shape.data.startx,shape.data.starty,shape.data.endx,shape.data.endy);
+      ctx.stroke();
+    }
+    else{
+      ctx.beginPath();
+      ctx.moveTo( shape.data.startx,shape.data.starty );
+      ctx.lineTo( shape.data.endx,shape.data.endy );
       ctx.stroke();
     }
   })

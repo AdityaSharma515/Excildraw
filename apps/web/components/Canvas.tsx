@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Tool, Toolbar } from './Toolbar'
 
 const Canvas = ({id,socket}:{id:string,socket:WebSocket}) => {
-    const [tool, setTool] = useState<Tool>("arrow")
+    const [tool, setTool] = useState<Tool>("line")
     const canvasRef = useRef<HTMLCanvasElement>(null)
     useEffect( () => {
     const canvas = canvasRef.current
