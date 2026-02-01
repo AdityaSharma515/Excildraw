@@ -52,7 +52,7 @@ type shape=|{
     ctx.stroke();
 }
 
-export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSocket,tool:Tool): Promise<() => void>{
+export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSocket,toolRef:React.RefObject<Tool>): Promise<() => void>{
     const ctx = canvas.getContext("2d")
     if (!ctx) return  () => {}
     let existingshape: shape[] = (await getshape(id)) ?? []; 
@@ -88,6 +88,7 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
 
     const onMouseUp = (e: MouseEvent) => {
       clicked = false
+       const tool = toolRef.current
       const pos = getMousePos(e)
       let shape:shape
       if(tool==="rectangle"){
@@ -139,8 +140,9 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
       if (!clicked) return
       clearcanvas(existingshape,canvas,ctx);
 
-        ctx.strokeStyle = "white"
-        ctx.lineWidth = 2
+      ctx.strokeStyle = "white"
+      ctx.lineWidth = 2
+      const tool = toolRef.current
       const pos = getMousePos(e)
       if (tool==="rectangle") {
         const width = pos.x - startX

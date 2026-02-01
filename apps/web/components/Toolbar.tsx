@@ -1,77 +1,75 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import {
+  MousePointer2,
+  Hand,
+  Square,
+  Circle,
+  Minus,
+  ArrowRight,
+  Pencil,
+  Type,
+} from "lucide-react"
 
 export type Tool =
-  | "cursor"
+  | "select"
+  | "hand"
   | "rectangle"
   | "circle"
   | "line"
   | "arrow"
   | "pencil"
   | "text"
-  | "eraser"
 
-const TOOL_GROUPS: { id: Tool; label: string }[][] = [
-  [
-    { id: "cursor", label: "🖱" },
-  ],
-  [
-    { id: "rectangle", label: "▭" },
-    { id: "circle", label: "◯" },
-    { id: "line", label: "／" },
-    { id: "arrow", label: "➜" },
-    { id: "pencil", label: "✎" },
-  ],
-  [
-    { id: "text", label: "A" },
-    { id: "eraser", label: "⌫" },
-  ],
-]
-
-export function Toolbar({
-  tool,
-  setTool,
-}: {
+interface ToolbarProps {
   tool: Tool
-  setTool: (t: Tool) => void
-}) {
-  return (
-    <div className="pointer-events-auto">
-      <div
-        className="
-          flex items-center gap-3
-          rounded-2xl px-4 py-3
-          bg-black/60 backdrop-blur-lg
-          border border-white/10
-          shadow-xl
-        "
-      >
-        {TOOL_GROUPS.map((group, groupIndex) => (
-          <div key={groupIndex} className="flex items-center gap-2">
-            {group.map(t => (
-              <Button
-                key={t.id}
-                size="icon"
-                onClick={() => setTool(t.id)}
-                className={cn(
-                  "h-10 w-10 rounded-xl",
-                  "text-white/70 hover:text-white",
-                  "hover:bg-white/10",
-                  "transition-all duration-150",
-                  tool === t.id &&
-                    "bg-white/20 text-white ring-1 ring-white/30"
-                )}
-              >
-                {t.label}
-              </Button>
-            ))}
+  setTool: (tool: Tool) => void
+}
 
-            {groupIndex < TOOL_GROUPS.length - 1 && (
-              <div className="mx-2 h-6 w-px bg-white/15" />
-            )}
-          </div>
-        ))}
+export function Toolbar({ tool, setTool }: ToolbarProps) {
+  return (
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
+      <div className="flex gap-1 rounded-xl bg-zinc-900/80 px-3 py-2 backdrop-blur shadow-lg">
+        <ToolBtn icon={<MousePointer2 size={18} />} active={tool === "select"} onClick={() => setTool("select")} />
+        <ToolBtn icon={<Hand size={18} />} active={tool === "hand"} onClick={() => setTool("hand")} />
+        <Divider />
+        <ToolBtn icon={<Square size={18} />} active={tool === "rectangle"} onClick={() => setTool("rectangle")} />
+        <ToolBtn icon={<Circle size={18} />} active={tool === "circle"} onClick={() => setTool("circle")} />
+        <ToolBtn icon={<Minus size={18} />} active={tool === "line"} onClick={() => setTool("line")} />
+        <ToolBtn icon={<ArrowRight size={18} />} active={tool === "arrow"} onClick={() => setTool("arrow")} />
+        <ToolBtn icon={<Pencil size={18} />} active={tool === "pencil"} onClick={() => setTool("pencil")} />
+        <ToolBtn icon={<Type size={18} />} active={tool === "text"} onClick={() => setTool("text")} />
       </div>
     </div>
   )
+}
+
+function ToolBtn({
+  icon,
+  active,
+  onClick,
+}: {
+  icon: React.ReactNode
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <Button
+      size="icon"
+      variant="ghost"
+      onClick={onClick}
+      className={`rounded-lg ${
+        active
+          ? "bg-white text-black"
+          : "text-zinc-300 hover:text-white"
+      }`}
+    >
+      {icon}
+    </Button>
+  )
+}
+
+function Divider() {
+  return <div className="mx-1 w-px bg-zinc-700" />
 }
