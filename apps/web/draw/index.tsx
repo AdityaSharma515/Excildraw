@@ -1,5 +1,5 @@
+import { Tool } from "@/components/Toolbar"
 import api from "@/lib/api"
-import { UUID } from "node:crypto"
 
 type Rectangledata={
   startx:number,
@@ -7,12 +7,52 @@ type Rectangledata={
   width:number,
   height:number
 }
-type shape={
+type CircleData={
+  centerx:number,
+  centery:number,
+  radius:number
+}
+type Linedata={
+  startx:number,
+  starty:number,
+  endx:number,
+  endy:number
+}
+
+type shape=|{
     type:"Rectangle",
     data:Rectangledata
+  }|
+  {
+    type:"Circle",
+    data:CircleData
+  }|
+  {
+    type:"Arrow",
+    data:Linedata
+  }|
+  {
+    type:"Line",
+    data:Linedata
   }
 
-export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSocket): Promise<() => void>{
+  function canvas_arrow(ctx:CanvasRenderingContext2D, fromx:number, fromy:number, tox:number, toy:number) {
+    const dx = tox - fromx;
+    const dy = toy - fromy;
+    const headlen =20
+    const angle = Math.atan2( dy, dx );
+    ctx.beginPath();
+    ctx.moveTo( fromx, fromy );
+    ctx.lineTo( tox, toy );
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo( tox - headlen * Math.cos( angle - Math.PI / 6 ), toy - headlen * Math.sin( angle - Math.PI / 6 ) );
+    ctx.lineTo( tox, toy );
+    ctx.lineTo( tox - headlen * Math.cos( angle + Math.PI / 6 ), toy - headlen * Math.sin( angle + Math.PI / 6 ) );
+    ctx.stroke();
+}
+
+export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSocket,tool:Tool): Promise<() => void>{
     const ctx = canvas.getContext("2d")
     if (!ctx) return  () => {}
     let existingshape: shape[] = (await getshape(id)) ?? []; 
@@ -49,14 +89,35 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
     const onMouseUp = (e: MouseEvent) => {
       clicked = false
       const pos = getMousePos(e)
-      const width = pos.x - startX
-      const height = pos.y - startY
-      const shape:shape={type:"Rectangle",data:{
-        "startx":startX,
-        "starty":startY,
-        width,
-        height
-      }}
+      let shape:shape
+      if(tool==="rectangle"){
+        const width = pos.x - startX
+        const height = pos.y - startY
+        shape={type:"Rectangle",data:{
+          "startx":startX,
+          "starty":startY,
+          width,
+          height
+        }}
+      }
+      else if(tool==="circle"){
+        const dx = pos.x - startX
+        const dy = pos.y - startY
+        const radius = Math.sqrt(dx * dx + dy * dy)
+        shape={type:"Circle",data:{
+          "centerx":startX,
+          "centery":startY,
+          radius
+        }}
+      }
+      else{
+        shape={type:"Arrow",data:{
+          "startx":startX,
+          "starty":startY,
+          endx:pos.x,
+          endy:pos.y
+        }}
+      }
       Saveshape(id,shape);
       existingshape.push(shape)
       socket.send(JSON.stringify({
@@ -68,16 +129,30 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
 
     const onMouseMove = (e: MouseEvent) => {
       if (!clicked) return
-
-      const pos = getMousePos(e)
-      const width = pos.x - startX
-      const height = pos.y - startY
-
       clearcanvas(existingshape,canvas,ctx);
 
-      ctx.strokeStyle = "white"
-      ctx.lineWidth = 2
-      ctx.strokeRect(startX, startY, width, height)
+        ctx.strokeStyle = "white"
+        ctx.lineWidth = 2
+      const pos = getMousePos(e)
+      if (tool==="rectangle") {
+        const width = pos.x - startX
+        const height = pos.y - startY
+        ctx.strokeRect(startX, startY, width, height)
+      }
+      else if(tool==="circle"){
+        const dx = pos.x - startX
+        const dy = pos.y - startY
+        const radius = Math.sqrt(dx * dx + dy * dy)
+
+        ctx.beginPath()
+        ctx.arc(startX, startY, radius, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+      else{
+        ctx.beginPath();
+        canvas_arrow(ctx, startX,startY,pos.x,pos.y);
+        ctx.stroke();
+      }
     }
 
     canvas.addEventListener("mousedown", onMouseDown)
@@ -93,10 +168,20 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
 function clearcanvas(existingshape:shape[],canvas:HTMLCanvasElement,ctx:CanvasRenderingContext2D){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   existingshape.map((shape)=>{
-    if(shape.type==="Rectangle"){
-      ctx.strokeStyle = "white"
-      ctx.lineWidth = 2
+    ctx.strokeStyle = "white"
+    ctx.lineWidth = 2
+    if(shape.type==="Rectangle"){  
       ctx.strokeRect(shape.data.startx, shape.data.starty, shape.data.width, shape.data.height)
+    }
+    else if(shape.type==="Circle"){
+      ctx.beginPath();
+      ctx.arc(shape.data.centerx, shape.data.centery, shape.data.radius, 0, Math.PI * 2)
+      ctx.stroke();
+    }
+    else{
+      ctx.beginPath();
+      canvas_arrow(ctx, shape.data.startx,shape.data.starty,shape.data.endx,shape.data.endy);
+      ctx.stroke();
     }
   })
 }

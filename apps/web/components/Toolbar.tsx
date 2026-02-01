@@ -66,7 +66,6 @@ export function Toolbar({
               </Button>
             ))}
 
-            {/* Divider between groups */}
             {groupIndex < TOOL_GROUPS.length - 1 && (
               <div className="mx-2 h-6 w-px bg-white/15" />
             )}
