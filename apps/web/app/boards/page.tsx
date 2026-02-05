@@ -11,7 +11,7 @@ import { UUID } from "crypto"
 
 
 type Board = {
-  id: UUID
+  id: string
   title: string
   isPublic: boolean
 }
@@ -33,7 +33,7 @@ export default function DashboardPage() {
     }
     getBoards()
   }, [])
-  async function deleteboard(id:UUID){
+  async function deleteboard(id:string){
     if (!confirm("Are you sure you want to delete this board?")) return
 
       try {
