@@ -7,7 +7,7 @@ import { BoardCard } from "@/components/BoardCard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { UUID } from "crypto"
+import AddCollaborator from "./AddCollaborator"
 
 
 type Board = {
@@ -19,6 +19,9 @@ type Board = {
 export default function DashboardPage() {
   const [boards, setBoards] = useState<Board[]>([])
   const [loading, setLoading] = useState(false)
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null)
+  const [collabOpen, setCollabOpen] = useState(false)
+
   const router=useRouter();
   useEffect(() => {
     async function getBoards() {
@@ -38,8 +41,7 @@ export default function DashboardPage() {
 
       try {
           const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
-          if (!BASE_URL) throw new Error("Backend URL not found")
-          // simulate API call
+        if (!BASE_URL) throw new Error("Backend URL not found")
           const response=await api.delete(`${BASE_URL}/boards/${id}`)
           console.log(response.data)
           router.refresh();
@@ -64,6 +66,13 @@ export default function DashboardPage() {
         </div>
         <CreateBoardDialog />
       </div>
+      {selectedBoardId && (
+        <AddCollaborator
+          boardId={selectedBoardId}
+          open={collabOpen}
+          onOpenChange={setCollabOpen}
+        />
+        )}
 
       {/* Content */}
       {loading ? (
@@ -88,7 +97,14 @@ export default function DashboardPage() {
             title={board.title}
             isPublic={board.isPublic}
             onDelete={()=>deleteboard(board.id)}
-  />
+            onCollaborate={() => {
+              setSelectedBoardId(board.id)
+              setCollabOpen(true)
+            }}
+            onJoin={(id) => {
+              router.push(`/canvas/${id}`)
+            }}
+            />
           ))}
         </div>
       )}

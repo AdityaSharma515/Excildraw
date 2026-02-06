@@ -25,7 +25,6 @@ export default function CreateBoardDialog() {
     Setloading(true)
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
     if (!BASE_URL) throw new Error("Backend URL not found")
-    // simulate API call
     const response=await api.post(`${BASE_URL}/boards`,{
       title:name,
       isPublic:visibility
@@ -34,13 +33,11 @@ export default function CreateBoardDialog() {
     toast.success("Board created")
     setOpen(false)
 
-    // 🔑 THIS IS IMPORTANT
     router.refresh()
   }
 
 return (
   <Dialog open={open} onOpenChange={setOpen}>
-    {/* 🔥 THIS WAS MISSING */}
     <DialogTrigger asChild>
       <Button>Create Board</Button>
     </DialogTrigger>
