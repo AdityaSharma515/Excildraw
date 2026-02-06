@@ -80,7 +80,7 @@ export function BoardCard({
         {/* Join Room */}
         <Button
           size="sm"
-          className="gap-2 shadow-sm"
+          className="gap-2 shadow-sm hover:shadow-md"
           onClick={(e) => {
             e.stopPropagation()
             onJoin(id)
