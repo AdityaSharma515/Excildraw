@@ -111,7 +111,7 @@ export async function deleteCollaborator(req:Request,res:Response,next:NextFunct
     }
     try {
         const boardid=req.params.id;
-        const userId=req.params.userId;
+        const userId=req.body.userId;
         if (!boardid) {
             res.status(400).json({
                 message:"Board id not present"
