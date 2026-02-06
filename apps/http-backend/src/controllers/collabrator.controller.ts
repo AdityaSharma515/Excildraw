@@ -90,7 +90,7 @@ export async function getCollaborator(req:Request,res:Response,next:NextFunction
             })
             return;
         }
-        const allCollaborators=await prismaClient.boardCollaborator.findMany({where:{boardId:boardid},select:{userid:true,role:true}});
+        const allCollaborators=await prismaClient.boardCollaborator.findMany({where:{boardId:boardid},select:{user:{select:{id:true,name:true,email:true}},role:true}});
         res.status(200).json({
             message:"Fetched all collaborator successfully",
             allCollaborators,
