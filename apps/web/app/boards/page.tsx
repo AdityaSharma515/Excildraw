@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import AddCollaborator from "./AddCollaborator"
+import { TopBar } from "./TopBar"
 
 type Board = {
   id: string
@@ -74,6 +75,7 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-7xl space-y-8">
         
         {/* Header Section */}
+        {/* <TopBar/> */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>

@@ -1,5 +1,7 @@
 import { Tool } from "@/components/Toolbar"
 import api from "@/lib/api"
+import { v4 as uuidv4 } from "uuid";
+import { dragMove, startDragging, stopDragging } from "./drag";
 
 type Rectangledata={
   startx:number,
@@ -19,19 +21,23 @@ type Linedata={
   endy:number
 }
 
-type shape=|{
+export type shape=|{
+    id:string,
     type:"Rectangle",
     data:Rectangledata
   }|
   {
+    id:string,
     type:"Circle",
     data:CircleData
   }|
   {
+    id:string,
     type:"Arrow",
     data:Linedata
   }|
   {
+    id:string,
     type:"Line",
     data:Linedata
   }
@@ -52,21 +58,64 @@ type shape=|{
     ctx.stroke();
 }
 
+function isPointInsideRect(
+  x: number,
+  y: number,
+  rect: Rectangledata
+) {
+  return (
+    x >= rect.startx &&
+    x <= rect.startx + rect.width &&
+    y >= rect.starty &&
+    y <= rect.starty + rect.height
+  )
+}
+function isPointInsideCircle(
+  x: number,
+  y: number,
+  circle: CircleData
+) {
+  const result=((x-circle.centerx)*(x-circle.centerx))+((y-circle.centery)*(y-circle.centery));
+  const d=Math.sqrt(result)
+  return (
+    d<=circle.radius
+  )
+}
+function checkinside(x:number,y:number,shape:shape){
+  if(shape.type==="Rectangle"){
+    return isPointInsideRect(x,y,shape.data)
+  }
+  else if(shape.type==="Circle"){
+    return isPointInsideCircle(x,y,shape.data)
+  }
+  return false
+}
+
 export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSocket,toolRef:React.RefObject<Tool>): Promise<() => void>{
     const ctx = canvas.getContext("2d")
     if (!ctx) return  () => {}
     let existingshape: shape[] = (await getshape(id)) ?? []; 
+    let selectedid:string|null=null
+    let mode: "idle" | "drawing" | "dragging" = "idle"
     socket.onmessage=(event)=>{
       const message=JSON.parse(event.data);
       console.log(message);
       if(message.type=="DRAW"){
-        existingshape.push(message.data.shape)
-        clearcanvas(existingshape,canvas,ctx)
+        const incoming: shape = message.data.shape
+        const idx = existingshape.findIndex(s => s.id === incoming.id)
+        if (idx >= 0) {
+          // update existing shape in-place
+          existingshape[idx] = incoming
+        } else {
+          // new shape, add it
+          existingshape.push(incoming)
+        }
+        clearcanvas(existingshape,canvas,ctx,selectedid)
       }
     }  
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
-    clearcanvas(existingshape,canvas,ctx);
+    clearcanvas(existingshape,canvas,ctx,selectedid);
     let clicked = false
     let startX = 0
     let startY = 0
@@ -80,21 +129,51 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
     }
 
     const onMouseDown = (e: MouseEvent) => {
-      clicked = true
       const pos = getMousePos(e)
       startX = pos.x
       startY = pos.y
+      const tool = toolRef.current
+
+      if (tool === "select") {
+        const hitshape = [...existingshape]
+          .reverse()
+          .find(shape => checkinside(startX, startY, shape))
+
+        if (hitshape && hitshape.id) {
+          selectedid = hitshape.id
+          mode = "dragging"
+          startDragging(hitshape, startX, startY) 
+          clearcanvas(existingshape, canvas, ctx, selectedid)
+        } else {
+          selectedid = null
+          mode = "idle"
+          clearcanvas(existingshape, canvas, ctx, selectedid)
+        }
+        return
+      }
+
+      clicked = true
+      mode = "drawing"
     }
 
+
     const onMouseUp = (e: MouseEvent) => {
+      const tool = toolRef.current
+      if (tool === "select" && mode === "dragging") {
+        stopDragging()
+        mode = "idle"
+        Saveshape(id, existingshape)
+        return
+      }
+      if (mode !== "drawing") return
       clicked = false
-       const tool = toolRef.current
+      mode = "idle"
       const pos = getMousePos(e)
       let shape:shape
       if(tool==="rectangle"){
         const width = pos.x - startX
         const height = pos.y - startY
-        shape={type:"Rectangle",data:{
+        shape={id:uuidv4(),type:"Rectangle",data:{
           "startx":startX,
           "starty":startY,
           width,
@@ -105,14 +184,14 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
         const dx = pos.x - startX
         const dy = pos.y - startY
         const radius = Math.sqrt(dx * dx + dy * dy)
-        shape={type:"Circle",data:{
+        shape={id:uuidv4(),type:"Circle",data:{
           "centerx":startX,
           "centery":startY,
           radius
         }}
       }
       else if(tool==="arrow"){
-        shape={type:"Arrow",data:{
+        shape={id:uuidv4(),type:"Arrow",data:{
           "startx":startX,
           "starty":startY,
           endx:pos.x,
@@ -120,7 +199,7 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
         }}
       }
       else{
-        shape={type:"Line",data:{
+        shape={id:uuidv4(),type:"Line",data:{
           "startx":startX,
           "starty":startY,
           endx:pos.x,
@@ -137,13 +216,19 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
     }
 
     const onMouseMove = (e: MouseEvent) => {
-      if (!clicked) return
-      clearcanvas(existingshape,canvas,ctx);
+      const tool = toolRef.current
+      const pos = getMousePos(e)
+      if (tool === "select" && mode === "dragging") {
+        existingshape = dragMove(existingshape, pos.x, pos.y)
+        clearcanvas(existingshape, canvas, ctx,selectedid)
+        return
+      }
+      if (!clicked || mode !== "drawing") return
+      clearcanvas(existingshape,canvas,ctx,selectedid);
 
       ctx.strokeStyle = "white"
       ctx.lineWidth = 2
-      const tool = toolRef.current
-      const pos = getMousePos(e)
+      
       if (tool==="rectangle") {
         const width = pos.x - startX
         const height = pos.y - startY
@@ -181,13 +266,26 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
   }
 }
 
-function clearcanvas(existingshape:shape[],canvas:HTMLCanvasElement,ctx:CanvasRenderingContext2D){
+function clearcanvas(existingshape:shape[],canvas:HTMLCanvasElement,ctx:CanvasRenderingContext2D,selectedid: string | null){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  existingshape.map((shape)=>{
+  existingshape.forEach((shape)=>{
     ctx.strokeStyle = "white"
     ctx.lineWidth = 2
     if(shape.type==="Rectangle"){  
       ctx.strokeRect(shape.data.startx, shape.data.starty, shape.data.width, shape.data.height)
+      if (shape.id === selectedid) {
+        ctx.save()
+        ctx.strokeStyle = "#4f46e5"  // nice blue
+        ctx.lineWidth = 2
+        ctx.setLineDash([6, 4])
+        ctx.strokeRect(
+          shape.data.startx - 4,
+          shape.data.starty - 4,
+          shape.data.width + 8,
+          shape.data.height + 8
+        )
+        ctx.restore()
+      }
     }
     else if(shape.type==="Circle"){
       ctx.beginPath();
@@ -216,6 +314,7 @@ async function getshape(id:string){
     const response=await api.get(`${BASE_URL}/boards/${id}/elements`)
     const elements=response.data.elements;
     const shapes: shape[] = elements.map((el: any) => ({
+      id:el.id,
       type: el.type,
       data: el.data    
     }))
