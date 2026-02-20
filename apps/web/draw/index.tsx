@@ -81,12 +81,41 @@ function isPointInsideCircle(
     d<=circle.radius
   )
 }
+function isPointOnLine(
+  x: number,
+  y: number,
+  line: Linedata
+):boolean {
+  const { startx, starty, endx, endy } = line
+
+  const lineLength = Math.hypot(endx - startx, endy - starty)
+
+  if (lineLength === 0) return false
+
+  const t =
+    ((x - startx) * (endx - startx) +
+      (y - starty) * (endy - starty)) /
+    (lineLength * lineLength)
+
+  const clampedT = Math.max(0, Math.min(1, t))
+
+  const closestX = startx + clampedT * (endx - startx)
+  const closestY = starty + clampedT * (endy - starty)
+
+  const distanceToLine = Math.hypot(x - closestX, y - closestY)
+
+  return distanceToLine < 6 
+}
+
 function checkinside(x:number,y:number,shape:shape){
   if(shape.type==="Rectangle"){
     return isPointInsideRect(x,y,shape.data)
   }
   else if(shape.type==="Circle"){
     return isPointInsideCircle(x,y,shape.data)
+  }
+  else if(shape.type==="Arrow"||shape.type==="Line"){
+    return isPointOnLine(x,y,shape.data)
   }
   return false
 }
@@ -104,10 +133,10 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
         const incoming: shape = message.data.shape
         const idx = existingshape.findIndex(s => s.id === incoming.id)
         if (idx >= 0) {
-          // update existing shape in-place
-          existingshape[idx] = incoming
+          if (mode !== "dragging") {
+            existingshape[idx] = incoming
+          }
         } else {
-          // new shape, add it
           existingshape.push(incoming)
         }
         clearcanvas(existingshape,canvas,ctx,selectedid)
@@ -291,17 +320,59 @@ function clearcanvas(existingshape:shape[],canvas:HTMLCanvasElement,ctx:CanvasRe
       ctx.beginPath();
       ctx.arc(shape.data.centerx, shape.data.centery, shape.data.radius, 0, Math.PI * 2)
       ctx.stroke();
+      if (shape.id === selectedid) {
+        ctx.save()
+        ctx.strokeStyle = "#4f46e5"  // nice blue
+        ctx.lineWidth = 2
+        ctx.setLineDash([6, 4])
+        ctx.beginPath()
+        ctx.arc(
+          shape.data.centerx ,
+          shape.data.centery ,
+          shape.data.radius + 6,
+          0, Math.PI * 2
+        )
+        ctx.stroke();
+        ctx.restore()
+      }
     }
     else if(shape.type==="Arrow"){
       ctx.beginPath();
       canvas_arrow(ctx, shape.data.startx,shape.data.starty,shape.data.endx,shape.data.endy);
       ctx.stroke();
+      if (shape.id === selectedid) {
+        ctx.save()
+        ctx.strokeStyle = "#4f46e5"  // nice blue
+        ctx.lineWidth = 2
+        ctx.setLineDash([6, 4])
+        ctx.beginPath()
+        canvas_arrow(
+          ctx,
+          shape.data.startx ,
+          shape.data.starty ,
+          shape.data.endx,
+          shape.data.endy
+        )
+        ctx.stroke();
+        ctx.restore()
+      }
     }
     else{
       ctx.beginPath();
       ctx.moveTo( shape.data.startx,shape.data.starty );
       ctx.lineTo( shape.data.endx,shape.data.endy );
       ctx.stroke();
+      if (shape.id === selectedid) {
+        ctx.save()
+        ctx.strokeStyle = "#4f46e5"  // nice blue
+        ctx.lineWidth = 2
+        ctx.setLineDash([6, 4])
+        ctx.beginPath()
+        ctx.moveTo( shape.data.startx,shape.data.starty );
+        ctx.lineTo( shape.data.endx,shape.data.endy );
+        ctx.stroke();
+        ctx.restore()
+      }
     }
   })
 }

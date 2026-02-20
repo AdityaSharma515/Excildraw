@@ -1,26 +1,26 @@
-
-import { shape } from "."
-
+import type { shape } from '.'
 
 type DragState = {
   id: string
-  offsetX: number
-  offsetY: number
+  initialMouseX: number
+  initialMouseY: number
+  initialShape: shape
 } | null
 
 let dragState: DragState = null
 
 export function startDragging(
-  shape: shape,
+  s: shape,
   mouseX: number,
   mouseY: number
 ) {
-  if (shape.type !== "Rectangle") return
-
+  if (!s.id) return
+  const initialShape: shape = JSON.parse(JSON.stringify(s))
   dragState = {
-    id: shape.id!,
-    offsetX: mouseX - shape.data.startx,
-    offsetY: mouseY - shape.data.starty,
+    id: s.id,
+    initialMouseX: mouseX,
+    initialMouseY: mouseY,
+    initialShape,
   }
 }
 
@@ -30,22 +30,51 @@ export function dragMove(
   mouseY: number
 ) {
   if (!dragState) return shapes
-
-  return shapes.map(s => {
-    if (s.id === dragState!.id && s.type === "Rectangle") {
-      return {
-        ...s,
-        data: {
-          ...s.data,
-          startx: mouseX - dragState!.offsetX,
-          starty: mouseY - dragState!.offsetY,
-        },
-      }
-    }
-    return s
-  })
+  const dx = mouseX - dragState.initialMouseX
+  const dy = mouseY - dragState.initialMouseY
+  return shapes.map(s => (s.id === dragState?.id ? moveShapeFromInitial(dragState.initialShape, dx, dy) : s))
 }
 
 export function stopDragging() {
   dragState = null
+}
+
+function moveShapeFromInitial(initial: shape, dx: number, dy: number): shape {
+  switch (initial.type) {
+    case "Rectangle":
+      return {
+        ...initial,
+        data: {
+          ...initial.data,
+          startx: initial.data.startx + dx,
+          starty: initial.data.starty + dy,
+        }
+      }
+
+    case "Circle":
+      return {
+        ...initial,
+        data: {
+          ...initial.data,
+          centerx: initial.data.centerx + dx,
+          centery: initial.data.centery + dy,
+        }
+      }
+
+    case "Line":
+    case "Arrow":
+      return {
+        ...initial,
+        data: {
+          ...initial.data,
+          startx: initial.data.startx + dx,
+          starty: initial.data.starty + dy,
+          endx: initial.data.endx + dx,
+          endy: initial.data.endy + dy,
+        }
+      }
+
+    default:
+      return initial
+  }
 }
