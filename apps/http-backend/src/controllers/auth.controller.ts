@@ -3,7 +3,6 @@ import {z} from "zod";
 import bcrypt from "bcrypt"
 import { prismaClient } from "@repo/db/client";
 import jwt from "jsonwebtoken";
-import passport from "passport";
 
 export async function signup(req:Request,res:Response,next:NextFunction){
     try {
@@ -153,4 +152,20 @@ export async function googlecallback(req:Request,res:Response,next:NextFunction)
     next(error);
    }
         
+}
+export async function logout(req:Request,res:Response,next:NextFunction){
+    try {
+        res.clearCookie("token",{
+            httpOnly:true,
+            secure: process.env.NODE_ENV === "production"?true:false,
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            path: "/"
+        })
+        return res.status(200).json({
+            message:"Logout succefully"
+        })
+    } catch (error) {
+        console.error("error in logout",error);
+        next(error)
+    }
 }

@@ -12,7 +12,6 @@ import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import AddCollaborator from "./AddCollaborator"
-import { TopBar } from "./TopBar"
 
 type Board = {
   id: string
