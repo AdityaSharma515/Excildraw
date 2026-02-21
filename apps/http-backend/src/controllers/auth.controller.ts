@@ -3,6 +3,7 @@ import {z} from "zod";
 import bcrypt from "bcrypt"
 import { prismaClient } from "@repo/db/client";
 import jwt from "jsonwebtoken";
+import passport from "passport";
 
 export async function signup(req:Request,res:Response,next:NextFunction){
     try {
@@ -67,7 +68,7 @@ export async function signin(req:Request,res:Response,next:NextFunction){
             return;
         }
         const NewUser=await prismaClient.user.findFirst({where:{email:email}});
-        if (!NewUser) {
+        if (!NewUser||!NewUser.password) {
             res.status(400).json({
                 message:"User not found!"
             });
@@ -91,7 +92,7 @@ export async function signin(req:Request,res:Response,next:NextFunction){
         res.clearCookie("token");
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_ENV === "production"?true:false,
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: 60 * 60 * 1000,
             path: "/",
@@ -127,4 +128,29 @@ export async function information(req:Request,res:Response,next:NextFunction){
         console.error(error);
     }
 
+}
+export async function googlecallback(req:Request,res:Response,next:NextFunction){
+   try {
+        const user = req.user as any;
+        const secret=process.env.JWT_SECRET;
+        if(!secret){
+            res.status(500).json({
+                message:"Server configuration error"
+            });
+            return;
+        }
+        const token=jwt.sign({id:user.id},secret,{expiresIn:"1h"})
+        res.clearCookie("token");
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production"?true:false,
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 60 * 60 * 1000,
+            path: "/",
+        });
+        res.redirect("http://localhost:3000/boards");
+   } catch (error) {
+    next(error);
+   }
+        
 }

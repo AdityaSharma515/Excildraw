@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/field"
 import { Separator } from "@/components/ui/separator"
 import api from "@/lib/api"
+import { FcGoogle } from "react-icons/fc"
 
 const formSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -70,6 +71,11 @@ export default function Page() {
       setLoading(false)
     }
   }
+  function handleGoogleSignup() {
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+    if (!BASE_URL) return
+    window.location.href = `${BASE_URL}/auth/google`
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted px-4">
@@ -84,6 +90,25 @@ export default function Page() {
         </CardHeader>
 
         <CardContent>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11 bg-white hover:bg-gray-50 text-gray-900 font-medium"
+            onClick={handleGoogleSignup}>
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Continue with Google
+          </Button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full bg-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-3 text-muted-foreground font-medium">
+                Or continue with email
+              </span>
+            </div>
+          </div>
+          
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-5"
