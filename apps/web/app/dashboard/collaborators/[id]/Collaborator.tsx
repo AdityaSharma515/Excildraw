@@ -10,9 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { 
   Trash2, 
   ArrowLeft, 
-  ShieldCheck, 
-  UserCog, 
-  Eye, 
+  UserCog,  
   Search,
   MoreVertical,
   Mail
@@ -69,7 +67,6 @@ const CollaboratorPage = ({ id }: { id: string }) => {
   }, [id])
 
   async function removeCollaborator(userId: string) {
-    // Optimistic UI: Remove visually first
     const previous = [...collaborators]
     setCollaborators((prev) => prev.filter((c) => c.user.id !== userId))
 
@@ -101,19 +98,10 @@ const CollaboratorPage = ({ id }: { id: string }) => {
     }
   }
 
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case "owner": return <ShieldCheck className="h-4 w-4 text-amber-500" />
-      case "editor": return <UserCog className="h-4 w-4 text-blue-500" />
-      default: return <Eye className="h-4 w-4 text-gray-500" />
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-50/50">
       <div className="mx-auto max-w-3xl px-6 py-12 space-y-8">
-        
-        {/* Navigation & Header */}
         <div className="space-y-6">
           <Button
             variant="ghost"
@@ -132,8 +120,6 @@ const CollaboratorPage = ({ id }: { id: string }) => {
                 Manage access and roles for this board.
               </p>
             </div>
-            
-            {/* Search Bar */}
             <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input 
@@ -145,8 +131,6 @@ const CollaboratorPage = ({ id }: { id: string }) => {
             </div>
           </div>
         </div>
-
-        {/* List Section */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           {loading ? (
             <div className="p-6 space-y-6">

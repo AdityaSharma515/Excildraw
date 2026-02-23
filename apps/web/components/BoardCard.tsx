@@ -22,6 +22,7 @@ type BoardCardProps = {
   onDelete: () => void
   onCollaborate: () => void
   onJoin: (id: string) => void
+  onClickSettings:()=>void
 }
 
 export function BoardCard({
@@ -31,6 +32,7 @@ export function BoardCard({
   onDelete,
   onCollaborate,
   onJoin,
+  onClickSettings,
 }: BoardCardProps) {
   return (
     <Card
@@ -106,6 +108,10 @@ export function BoardCard({
           <Button
             variant="outline"
             size="icon"
+            onClick={(e) => {
+              e.stopPropagation()
+              onClickSettings()
+            }}
           >
             <Settings className="h-4 w-4" />
           </Button>

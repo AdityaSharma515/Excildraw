@@ -61,7 +61,7 @@ return (
       </select>
 
       <Button
-        className="w-full"
+        className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl shadow-sm transition-all font-semibold px-6"
         onClick={createBoard}
         disabled={loading}
       >
