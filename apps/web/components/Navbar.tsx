@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { PenTool, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeSwitcher } from '@/app/ThemeSwitcher';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,6 +38,7 @@ export default function Navbar() {
               {item}
             </Link>
           ))}
+          <ThemeSwitcher />
           <Link
             href="/app"
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-lg shadow-indigo-200"

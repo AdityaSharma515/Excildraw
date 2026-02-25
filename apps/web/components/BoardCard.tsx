@@ -36,14 +36,14 @@ export function BoardCard({
 }: BoardCardProps) {
   return (
     <Card
-      className="
-        group relative overflow-hidden
+      className={
+        `group relative overflow-hidden
         cursor-pointer rounded-2xl
         border transition-all duration-300
         hover:-translate-y-1
-        hover:shadow-2xl
-        hover:border-primary/40
-      "
+        hover:shadow-2xl`
+      }
+      style={{ backgroundColor: 'var(--card)', color: 'var(--card-foreground)', borderColor: 'var(--border)'}}
     >
       {/* Header */}
       <CardHeader className="space-y-2 pb-3">
@@ -70,7 +70,7 @@ export function BoardCard({
           </Badge>
         </div>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
           {isPublic
             ? "Anyone with the link can join"
             : "Invite-only private board"}
@@ -131,12 +131,10 @@ export function BoardCard({
       </CardContent>
 
       {/* Hover glow */}
-      <div className="
-        pointer-events-none absolute inset-0
-        opacity-0 group-hover:opacity-100
-        transition-opacity
-        bg-gradient-to-br from-primary/10 via-transparent to-transparent
-      " />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ backgroundColor: 'var(--ring)', mixBlendMode: 'overlay' }}
+      />
     </Card>
   )
 }

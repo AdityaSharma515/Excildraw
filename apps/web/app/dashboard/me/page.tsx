@@ -7,15 +7,15 @@ import {
   User, 
   Mail, 
   ShieldCheck, 
-  Calendar, 
   ArrowLeft,
-  LogOut
+  LogOut,
+  Copy,
+  Check
 } from "lucide-react"
 
 import {
   Card,
   CardContent,
-  CardHeader,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -34,13 +34,13 @@ type UserProfile = {
 export default function ViewProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [copied, setCopied] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     async function fetchMyProfile() {
       try {
         const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
-        // Assuming you have an endpoint that returns the currently logged-in user
         const res = await api.get(`${BASE_URL}/auth/me`) 
         setUser(res.data.currentuser)
       } catch (error) {
@@ -54,7 +54,6 @@ export default function ViewProfilePage() {
   }, [])
 
   async function handleLogout() {
-    // Add your logout logic here (clear tokens, cookies, etc.)
     try {
         const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
         await api.post(`${BASE_URL}/auth/logout`)
@@ -65,119 +64,140 @@ export default function ViewProfilePage() {
     }
   }
 
-  // Helper to generate a nice gradient based on the user's name
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    toast.success("ID copied to clipboard")
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  // Updated to use brand-aligned purples/indigos/fuchsias instead of random colors
   const getAvatarGradient = (name: string = "U") => {
     const gradients = [
-      "from-blue-500 to-indigo-500",
-      "from-emerald-400 to-teal-500",
-      "from-rose-400 to-red-500",
-      "from-amber-400 to-orange-500",
+      "from-violet-500 to-fuchsia-500",
+      "from-indigo-500 to-purple-500",
+      "from-purple-500 to-pink-500",
+      "from-violet-600 to-indigo-600",
     ]
     const index = name.charCodeAt(0) % gradients.length
     return gradients[index]
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
       <div className="mx-auto max-w-2xl space-y-6">
         
         {/* Navigation / Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
-            className="-ml-4 text-muted-foreground hover:text-gray-900"
+            className="-ml-4 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all"
             onClick={() => router.back()}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
           </Button>
         </div>
 
         {/* Profile Card */}
-        <Card className="overflow-hidden shadow-sm border-gray-200 bg-white">
+        <Card className="overflow-hidden shadow-xl shadow-primary/5 border-border bg-card rounded-2xl transition-all">
           {loading ? (
              <div className="p-8 space-y-6">
                <div className="flex items-center gap-6">
-                 <Skeleton className="h-24 w-24 rounded-full" />
+                 <Skeleton className="h-28 w-28 rounded-full" />
                  <div className="space-y-3">
-                   <Skeleton className="h-6 w-48" />
-                   <Skeleton className="h-4 w-32" />
+                   <Skeleton className="h-8 w-48" />
+                   <Skeleton className="h-5 w-32" />
                  </div>
                </div>
                <Skeleton className="h-[1px] w-full" />
-               <div className="space-y-4">
-                 <Skeleton className="h-12 w-full" />
-                 <Skeleton className="h-12 w-full" />
+               <div className="space-y-4 pt-4">
+                 <Skeleton className="h-16 w-full rounded-xl" />
+                 <Skeleton className="h-16 w-full rounded-xl" />
+                 <Skeleton className="h-16 w-full rounded-xl" />
                </div>
              </div>
           ) : !user ? (
-            <div className="p-12 text-center text-muted-foreground">
+            <div className="p-12 text-center text-muted-foreground font-medium">
               Failed to load user data.
             </div>
           ) : (
             <>
-              {/* Colorful Top Banner */}
-              <div className={`h-32 w-full bg-gradient-to-r ${getAvatarGradient(user.name)} opacity-90`} />
+              {/* Brand-aligned Top Banner */}
+              <div className={`h-36 w-full bg-gradient-to-r ${getAvatarGradient(user.name)} opacity-90`} />
               
-              <CardContent className="px-8 pb-8">
-                {/* Avatar overlapping the banner */}
-                <div className="relative -mt-16 mb-6 flex justify-between items-end">
-                  <div className={`flex h-32 w-32 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br ${getAvatarGradient(user.name)} text-5xl font-bold text-white shadow-md`}>
+              <CardContent className="px-6 sm:px-10 pb-10">
+                {/* Avatar & Role Header */}
+                <div className="relative -mt-16 mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                  <div className={`flex h-32 w-32 items-center justify-center rounded-full border-4 border-card bg-gradient-to-br ${getAvatarGradient(user.name)} text-5xl font-extrabold text-white shadow-lg shrink-0`}>
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                   
-                  <Badge variant="secondary" className="mb-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1 text-sm">
-                     {user.role || "Member"}
-                  </Badge>
+                  <div className="flex flex-col sm:items-end pb-2">
+                    <h1 className="text-3xl font-extrabold text-foreground tracking-tight">{user.name}</h1>
+                    <div className="flex items-center gap-3 mt-2">
+                      <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1 text-sm font-semibold rounded-full border-0">
+                         {user.role || "Member"}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-1 mb-8">
-                  <h1 className="text-3xl font-bold text-gray-900">{user.name}</h1>
-                  <p className="text-muted-foreground text-lg">Personal Information</p>
+                <div className="mb-6">
+                  <h2 className="text-sm font-bold tracking-wider text-muted-foreground uppercase">Personal Information</h2>
                 </div>
 
                 {/* Data Rows */}
-                <div className="space-y-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4">
+                <div className="space-y-3">
                   
                   {/* Name Row */}
-                  <div className="flex items-center p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-4 shrink-0">
+                  <div className="flex items-center p-4 bg-background rounded-xl border border-border/60 shadow-sm transition-colors hover:border-border">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary mr-4 shrink-0">
                       <User className="h-5 w-5" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Full Name</p>
-                      <p className="font-semibold text-gray-900">{user.name}</p>
+                    <div className="flex-1">
+                      <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Full Name</p>
+                      <p className="font-semibold text-foreground text-base">{user.name}</p>
                     </div>
                   </div>
 
                   {/* Email Row */}
-                  <div className="flex items-center p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 mr-4 shrink-0">
+                  <div className="flex items-center p-4 bg-background rounded-xl border border-border/60 shadow-sm transition-colors hover:border-border">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary mr-4 shrink-0">
                       <Mail className="h-5 w-5" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Email Address</p>
-                      <p className="font-semibold text-gray-900">{user.email}</p>
+                    <div className="flex-1">
+                      <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Email Address</p>
+                      <p className="font-semibold text-foreground text-base">{user.email}</p>
                     </div>
                   </div>
 
-                  {/* Account Type Row */}
-                  <div className="flex items-center p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mr-4 shrink-0">
+                  {/* ID Row with Copy Feature */}
+                  <div className="flex items-center p-4 bg-background rounded-xl border border-border/60 shadow-sm transition-colors hover:border-border group">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary mr-4 shrink-0">
                       <ShieldCheck className="h-5 w-5" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Account Role</p>
-                      <p className="font-semibold text-gray-900 capitalize">{user.role || "Standard User"}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Account ID</p>
+                      <p className="font-medium text-foreground text-sm truncate pr-4 font-mono">{user.id}</p>
                     </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => copyToClipboard(user.id)}
+                      className="shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 h-9 w-9 rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                      title="Copy ID"
+                    >
+                      {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                    </Button>
                   </div>
 
                 </div>
 
                 {/* Bottom Actions */}
-                <div className="mt-8 flex justify-end">
+                <div className="mt-10 pt-6 border-t border-border flex justify-end">
                   <Button 
-                    variant="destructive" 
-                    className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-none"
+                    variant="ghost" 
+                    className="text-red-500 hover:bg-red-500/10 hover:text-red-600 font-semibold rounded-xl px-6 h-11 transition-colors"
                     onClick={handleLogout}
                   >
                     <LogOut className="mr-2 h-4 w-4" />

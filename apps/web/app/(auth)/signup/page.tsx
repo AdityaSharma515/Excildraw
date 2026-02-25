@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { FcGoogle } from "react-icons/fc"
+import { useRouter } from "next/navigation"
 
 import {
   Card,
@@ -46,6 +47,7 @@ const formSchema = z.object({
 export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,6 +72,7 @@ export default function SignupPage() {
         id: toastId,
       })
       form.reset()
+      router.push('/dashboard') // Redirect to dashboard after signup
     } catch (error) {
       console.error(error)
       toast.error("Failed to create account. Please try again.", {
@@ -87,32 +90,44 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50/50 px-4 py-12 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md shadow-xl border-gray-100/50 bg-white/80 backdrop-blur-xl">
-        <CardHeader className="space-y-2 text-center pb-6">
-          <CardTitle className="text-3xl font-bold tracking-tight text-gray-900">
+    // Updated background to dynamic bg-background
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
+      
+      {/* Updated Card to match the SignInPage perfectly */}
+      <Card className="w-full max-w-md shadow-2xl border border-border bg-card rounded-2xl overflow-hidden transition-colors">
+        <CardHeader className="space-y-3 text-center pt-10 pb-6">
+          {/* Brand Logo Header */}
+          <div className="mx-auto bg-primary w-12 h-12 rounded-xl flex items-center justify-center shadow-md mb-2">
+             <svg className="w-7 h-7 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+             </svg>
+          </div>
+          <CardTitle className="text-3xl font-extrabold tracking-tight text-foreground">
             Create an account
           </CardTitle>
-          <CardDescription className="text-base text-muted-foreground">
+          <CardDescription className="text-base text-muted-foreground font-medium">
             Sign up to start collaborating on your boards
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="px-8 space-y-6">
+          {/* Google Button updated for dark mode compatibility */}
           <Button
             type="button"
             variant="outline"
-            className="w-full h-11 bg-white hover:bg-gray-50 text-gray-900 font-medium"
+            className="w-full h-12 bg-background hover:bg-accent hover:text-accent-foreground text-foreground border-border font-semibold rounded-xl transition-all shadow-sm"
             onClick={handleGoogleSignup}>
-            <FcGoogle className="mr-2 h-5 w-5" />
+            <FcGoogle className="mr-3 h-5 w-5" />
             Continue with Google
           </Button>
-          <div className="relative">
+          
+          <div className="relative py-2">
             <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full bg-gray-200" />
+              <Separator className="w-full bg-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-3 text-muted-foreground font-medium">
+              {/* Background matched to Card background to mask the separator */}
+              <span className="bg-card px-4 text-muted-foreground font-bold tracking-wider">
                 Or continue with email
               </span>
             </div>
@@ -121,94 +136,91 @@ export default function SignupPage() {
           {/* Form */}
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
+            className="space-y-5"
           >
-            <FieldGroup>
+            <FieldGroup className="space-y-4">
               <Controller
                 name="name"
                 control={form.control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel className="text-gray-700">Full Name</FieldLabel>
+                  <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                    <FieldLabel className="text-sm font-semibold text-foreground">Full Name</FieldLabel>
                     <Input
                       {...field}
                       placeholder="John Doe"
-                      className="h-11 transition-all focus-visible:ring-indigo-500"
+                      className="h-12 rounded-xl border-border bg-background text-foreground focus-visible:ring-primary focus-visible:ring-offset-0 transition-all"
                       aria-invalid={fieldState.invalid}
                     />
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError errors={[fieldState.error]} className="text-destructive text-xs mt-1" />
                     )}
                   </Field>
                 )}
               />
-            </FieldGroup>
 
-            <FieldGroup>
               <Controller
                 name="email"
                 control={form.control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel className="text-gray-700">Email Address</FieldLabel>
+                  <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                    <FieldLabel className="text-sm font-semibold text-foreground">Email Address</FieldLabel>
                     <Input
                       {...field}
                       type="email"
                       placeholder="you@example.com"
-                      className="h-11 transition-all focus-visible:ring-indigo-500"
+                      className="h-12 rounded-xl border-border bg-background text-foreground focus-visible:ring-primary focus-visible:ring-offset-0 transition-all"
                       aria-invalid={fieldState.invalid}
                     />
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError errors={[fieldState.error]} className="text-destructive text-xs mt-1" />
                     )}
                   </Field>
                 )}
               />
-            </FieldGroup>
 
-            <FieldGroup>
               <Controller
                 name="password"
                 control={form.control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel className="text-gray-700">Password</FieldLabel>
+                  <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                    <FieldLabel className="text-sm font-semibold text-foreground">Password</FieldLabel>
                     <div className="relative">
                       <Input
                         {...field}
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
-                        className="h-11 pr-10 transition-all focus-visible:ring-indigo-500"
+                        className="h-12 pr-10 rounded-xl border-border bg-background text-foreground focus-visible:ring-primary focus-visible:ring-offset-0 transition-all"
                         aria-invalid={fieldState.invalid}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOff className="h-5 w-5" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-5 w-5" />
                         )}
                       </button>
                     </div>
                     {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
+                      <FieldError errors={[fieldState.error]} className="text-destructive text-xs mt-1" />
                     )}
                   </Field>
                 )}
               />
             </FieldGroup>
 
+            {/* Primary Submit Button matching the SignInPage pill shape */}
             <Button
               type="submit"
-              className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white transition-all mt-6"
+              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full shadow-lg hover:shadow-xl transition-all mt-6 text-base"
               disabled={loading}
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Creating account...
                 </>
               ) : (
@@ -219,12 +231,12 @@ export default function SignupPage() {
         </CardContent>
         
         {/* Helper Footer Link */}
-        <CardFooter className="flex justify-center border-t border-gray-100 p-6">
-          <p className="text-sm text-muted-foreground">
+        <CardFooter className="flex justify-center border-t border-border p-6 mt-2 bg-muted/20">
+          <p className="text-sm text-muted-foreground font-medium">
             Already have an account?{" "}
             <Link 
-              href="/login" 
-              className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors"
+              href="/signin" 
+              className="font-semibold text-primary hover:text-primary/80 transition-colors"
             >
               Sign in
             </Link>
