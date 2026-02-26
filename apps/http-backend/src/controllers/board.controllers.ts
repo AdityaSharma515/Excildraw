@@ -330,3 +330,44 @@ export async function viewVersions(req:Request,res:Response,next:NextFunction){
         console.error(error)
     }
 }
+export async function checkaccess(req:Request,res:Response,next:NextFunction){
+    try {
+        if(!req.user || !req.user.id){
+        return res.status(401).json({
+            message:"Unauthourize"
+        })
+        }
+        const boardid=req.params.id;
+        if(!boardid){
+            return res.status(402).json({
+                message:"Board Id not present"
+            })
+        }
+        const response=await prismaClient.board.findFirst({
+            where:{
+                id:boardid,
+                OR:[
+                    {isPublic:true},
+                    {collaborators:{
+                        some:{
+                            userid:req.user.id
+                        }
+                    }}
+                ]
+            }
+        })
+        if(!response){
+            return res.status(201).json({
+                message:"faliure"
+            })
+        }
+        res.status(201).json({
+            message:"success",
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message:"server error"
+        })
+    }
+}

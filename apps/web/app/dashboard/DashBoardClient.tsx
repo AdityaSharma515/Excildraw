@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import AddCollaborator from "./AddCollaborator"
+import { Button } from "@/components/ui/button"
+import JoinRoomDialog from "./JoinRoomDialog"
 
 export type Board = {
   id: string
@@ -26,6 +28,7 @@ const DashBoardClient = ({ boards: InitialBoard = [] }: Props) => {
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null)
   const [collabOpen, setCollabOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [joinopen,setjoinopen]=useState<boolean>(false)
   const router = useRouter()
 
   async function deleteboard(id: string) {
@@ -82,8 +85,14 @@ const DashBoardClient = ({ boards: InitialBoard = [] }: Props) => {
           <div className="w-full sm:w-auto">
             <CreateBoardDialog Oncreate={addboard}/>
           </div>
+          <div className="w-full sm:w-auto flex gap-3">
+            <Button variant="outline" onClick={()=>setjoinopen(true)} className="rounded-xl border-primary text-primary hover:bg-primary/10 transition-all font-semibold px-6 shadow-sm h-11" >Join Room</Button>
+          </div>
         </div>
       </div>
+      {joinopen&&(
+        <JoinRoomDialog open={joinopen} onOpenChange={setjoinopen} />
+      )}
 
       {selectedBoardId && (
         <AddCollaborator
