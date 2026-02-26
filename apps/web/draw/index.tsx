@@ -180,7 +180,6 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
         }
         return
       }
-
       clicked = true
       mode = "drawing"
     }
@@ -267,7 +266,6 @@ export async function initdraw(canvas:HTMLCanvasElement,id:string,socket:WebSock
         const dx = pos.x - startX
         const dy = pos.y - startY
         const radius = Math.sqrt(dx * dx + dy * dy)
-
         ctx.beginPath()
         ctx.arc(startX, startY, radius, 0, Math.PI * 2)
         ctx.stroke()
