@@ -147,7 +147,7 @@ export async function googlecallback(req:Request,res:Response,next:NextFunction)
             maxAge: 60 * 60 * 1000,
             path: "/",
         });
-        res.redirect("http://localhost:3000/boards");
+        res.redirect("http://localhost:3000/dashboard");
    } catch (error) {
     next(error);
    }
