@@ -1,25 +1,12 @@
 version: '3.9'
 services:
-  ngnix: 
-    image: ngnix:alpine
-    container_name: ngnix
-    ports: 
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - http-backend
-      - ws-backend
-      - web
-
-
   http-backend:
     restart: always
     build:
       context: .
       dockerfile: docker/Dockerfile.http
-    expose:
-      - "3001"
+    ports:
+      - "3001:3001"
     environment:
       - DATABASE_URL=${DATABASE_URL}
   ws-backend:
@@ -27,8 +14,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.ws
-    expose:
-      - "5000"
+    ports:
+      - "5000:5000"
     environment:
       - DATABASE_URL=${DATABASE_URL}
   web:
@@ -36,5 +23,5 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.fe
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"
