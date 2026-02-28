@@ -23,6 +23,7 @@ services:
       - "5000:5000"
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET} 
   web:
     restart: always
     build:
