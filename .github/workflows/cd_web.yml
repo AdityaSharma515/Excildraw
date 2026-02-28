@@ -1,0 +1,36 @@
+name: Continuous Deployment frontend
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Docker login
+        uses: docker/login-actions@v2
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Set up DOCKER Buildx
+        uses: docker/setup-buildx-actions@v2
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./docker/Dockerfile.fe
+          push: true
+          tags: adityasharma515/exclidraw:${{github.sha}}
+
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{secrets.HOST_IP}}
+          username: ${{secrets.HOST_NAME}}
+          key: ${{secrets.AWS_KEY}}
+          port: 22
+          script: ./deploy.sh
+        
