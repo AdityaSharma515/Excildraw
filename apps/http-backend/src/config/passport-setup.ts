@@ -3,7 +3,8 @@ import { Strategy as GoogleStrategy,Profile, VerifyCallback} from "passport-goog
 import { prismaClient } from "@repo/db/client";
 const clientID = process.env.GOOGLE_CLIENT_ID;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-if (!clientID || !clientSecret) {
+const callbackURL=process.env.GOOGLE_CALLBACK_URL
+if (!clientID || !clientSecret || !callbackURL) {
   throw new Error("Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET");
 }
 passport.use(
@@ -11,7 +12,7 @@ passport.use(
     {
       clientID,
       clientSecret,
-      callbackURL: "http://localhost:3001/api/v1/auth/google/callback"
+      callbackURL
     },
     async (accessToken: string, refreshToken: string,profile: Profile,done: VerifyCallback) => {
       try {
