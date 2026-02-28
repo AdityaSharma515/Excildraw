@@ -149,7 +149,7 @@ export async function googlecallback(req:Request,res:Response,next:NextFunction)
             maxAge: 60 * 60 * 1000,
             path: "/",
         });
-        res.redirect("http://localhost:3000/dashboard");
+        res.redirect(process.env.NODE_ENV === "production"?"https://sketchflow.adityashop.shop/dashboard":"http://localhost:3000/dashboard");
    } catch (error) {
     next(error);
    }
