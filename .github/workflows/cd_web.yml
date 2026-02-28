@@ -23,7 +23,7 @@ jobs:
           context: .
           file: ./docker/Dockerfile.fe
           push: true
-          tags: adityasharma515/exclidraw:${{github.sha}}
+          tags: adityasharma515/excildraw:${{github.sha}}
 
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@v1.2.0
