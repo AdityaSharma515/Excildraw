@@ -13,6 +13,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}
       NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET} 
   ws-backend:
     restart: always
     build:
