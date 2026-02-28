@@ -23,15 +23,7 @@ jobs:
           context: .
           file: ./docker/Dockerfile.ws
           push: true
-          tags: adityasharma515/excildraw:${{github.sha}}
+          tags: adityasharma515/excildraw-ws:${{github.sha}}
           build-args: |
             DATABASE_URL=${{secrets.DATABASE_URL}}
 
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{secrets.HOST_IP}}
-          username: ${{secrets.HOST_NAME}}
-          key: ${{secrets.AWS_KEY}}
-          port: 22
-          script: ./deploy.sh

@@ -1,0 +1,21 @@
+name: deploy image
+on:
+  workflow_run:
+    workflows:
+      - Continuous Deployment frontend
+      - Continuous Deployment WS-Backend
+      - Continuous Deployment Backend
+    types:
+      - completed
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{secrets.HOST_IP}}
+          username: ${{secrets.HOST_NAME}}
+          key: ${{secrets.AWS_KEY}}
+          port: 22
+          script: ./deploy.sh

@@ -28,13 +28,5 @@ jobs:
           context: .
           file: ./docker/Dockerfile.fe
           push: true
-          tags: adityasharma515/excildraw:${{github.sha}}
+          tags: adityasharma515/excildraw-fe:${{github.sha}}
 
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{secrets.HOST_IP}}
-          username: ${{secrets.HOST_NAME}}
-          key: ${{secrets.AWS_KEY}}
-          port: 22
-          script: ./deploy.sh
