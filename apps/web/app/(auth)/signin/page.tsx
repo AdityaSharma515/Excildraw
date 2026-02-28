@@ -161,7 +161,7 @@ export default function SignInPage() {
                     <div className="flex items-center justify-between">
                       <FieldLabel className="text-sm font-semibold text-foreground">Password</FieldLabel>
                       {/* Brand-aware link colors */}
-                      <Link href="/forgot-password" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
+                      <Link href="#" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
                         Forgot password?
                       </Link>
                     </div>
