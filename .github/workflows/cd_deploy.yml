@@ -84,4 +84,4 @@ jobs:
           username: ${{secrets.HOST_NAME}}
           key: ${{secrets.AWS_KEY}}
           port: 22
-          script: ./deploy.sh 
+          script: ./deploy.sh
