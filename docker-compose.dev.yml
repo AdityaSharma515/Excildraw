@@ -12,7 +12,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    
+  
+  promethus:
+    image: prom/prometheus:latest
+    restart: always
+    volumes:
+      - ./prometheus.yml/:/etc/prometheus/prometheus.yml
+    ports:
+    - "9090:9090"
   http-backend:
     restart: always
     build:

@@ -7,6 +7,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import "./config/passport-setup"
+import metrics from "./middleware/final_metrics";
 const app=express();
 app.use(express.json());
 app.use(cors({
@@ -15,6 +16,7 @@ app.use(cors({
 }))
 app.use(cookieParser())
 app.use(passport.initialize());
+app.use(metrics)
 app.use("/api/v1",router)
 
 const PORT=process.env.PORT||3001
