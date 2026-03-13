@@ -1,15 +1,10 @@
 name: deploy image
 on:
-  workflow_run:
-    workflows:
-      - Continuous Deployment frontend
-      - Continuous Deployment WS-Backend
-      - Continuous Deployment Backend
-    types:
-      - completed
+  push:
+    branches:
+      - main
 jobs:
   deploy:
-    if: ${{github.event.workflow_run.conclusion == 'success'}}
     runs-on: ubuntu-latest
     steps:
       - name: executing remote ssh commands using password
