@@ -74,6 +74,7 @@ jobs:
             DATABASE_URL=${{secrets.DATABASE_URL}}
 
   deploy:
+    needs: [build-backend, build-frontend, build-ws_backend]
     runs-on: ubuntu-latest
     steps:
       - name: executing remote ssh commands using password
